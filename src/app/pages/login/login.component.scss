@@ -1,0 +1,24 @@
+:host {
+  div.main-div {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    div.box {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-width: 30rem;
+      min-height: 15rem;
+      background-color: var(--bs-purple);
+      border-radius: 4px;
+      margin-top: 10rem;
+      span {
+        font-weight: bold;
+        font-size: 1.5em;
+        text-align: center;
+      }
+    }
+  }
+}
