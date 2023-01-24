@@ -13,6 +13,6 @@ export const authCodeFlowConfig: AuthConfig = {
   useHttpBasicAuth: true,
   showDebugInformation: true,
   oidc: false,
-  disablePKCE: true,
+  disablePKCE: false,
   revocationEndpoint: 'http://localhost:8086/auth-server/oauth2/revoke',
 }
