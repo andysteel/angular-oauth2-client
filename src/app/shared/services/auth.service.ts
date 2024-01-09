@@ -4,6 +4,7 @@ import { OAuthService } from 'angular-oauth2-oidc';
 import { filter } from 'rxjs';
 import { authCodeFlowConfig } from './types/oauth-config';
 import { Base64 } from 'js-base64';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -12,14 +13,15 @@ export class AuthService {
 
   constructor(
     private oauthService: OAuthService,
-    private router: Router) {
+    private router: Router,
+    private httpClient: HttpClient) {
     this.oauthService.configure(authCodeFlowConfig);
 
     this.oauthService
       .events
       .pipe(
         filter(e => e.type === 'token_expires')
-      ).subscribe((_) => this.refreshToken())
+      ).subscribe((_) => this.refreshToken());
   }
 
   getUserName(): string | null {
@@ -45,14 +47,17 @@ export class AuthService {
   }
 
   hasValidAccessToken() {
-    const tokenExpiration = this.oauthService.getAccessTokenExpiration();
-    const now = Date.now();
+    const headers = new HttpHeaders().set('Content-Type', 'application/x-www-form-urlencoded');
+    const urlencoded = new URLSearchParams();
+    urlencoded.append('token', sessionStorage.getItem('access_token'));
 
-    return now < tokenExpiration;
+    return this.httpClient.post<{active: boolean}>('http://localhost:8086/auth-server/oauth2/introspect',
+    urlencoded,
+    {headers});
   }
 
   async doLogin() {
-    return await this.oauthService.tryLogin()
+    return await this.oauthService.tryLoginCodeFlow()
     .catch(error => {
       this.router.navigate(['/login']);
       throw new Error('Error trying to login: ', {cause: error});

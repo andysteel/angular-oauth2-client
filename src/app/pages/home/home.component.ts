@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from 'src/app/shared/services/auth.service';
 
 @Component({
@@ -8,11 +9,13 @@ import { AuthService } from 'src/app/shared/services/auth.service';
 })
 export class HomeComponent {
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router) {}
 
   logout() {
     this.authService.doLogout()
-    .then((_) => window.location.reload())
+    .then((_) => this.router.navigate(['/login']))
     .catch(error => console.error(error));
   }
 }

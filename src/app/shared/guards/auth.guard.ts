@@ -1,33 +1,38 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { Observable } from 'rxjs';
-import { AuthService } from '../services/auth.service';
+import { inject } from "@angular/core";
+import { CanActivateFn, Router, UrlTree } from "@angular/router";
+import { map, catchError, throwError } from "rxjs";
+import { AuthService } from "../services/auth.service";
 
-@Injectable({
-  providedIn: 'root'
-})
-export class AuthGuard implements CanActivate {
+export const authGuardFn: CanActivateFn = (route, state) => {
+  // const authService = inject(AuthService);
+  const router = inject(Router);
 
-  constructor(private authService: AuthService, private router: Router) {}
-
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-      const isValidToken = this.authService.hasValidAccessToken();
-      if(isValidToken) {
-        return isValidToken;
-      } else {
-        return new Promise(async (res) => {
-          await this.authService.doLogin();
-          const isUsuarioLogado = this.authService.hasValidAccessToken();
-          if(isUsuarioLogado) {
-            route.queryParams = {}
-            res(true);
-          } else {
-            res(this.router.parseUrl('/login'));
-          }
-        })
-      }
+  const accessToken = sessionStorage.getItem('access_token');
+  if(accessToken) {
+    console.log("TEM")
+    return true;
+    // return authService.hasValidAccessToken()
+    // .pipe(
+    //   map( response => {
+    //     if(!response.active) {
+    //       return router.createUrlTree(['/login']);
+    //     }
+    //     console.log("VAI PRA HOME")
+    //     return router.createUrlTree(['/home']);
+    //   }),
+    //   catchError( (error) => {
+    //     router.navigate(['/login']);
+    //     return throwError(() => error);
+    //   })
+    // );
+  } else {
+    console.log("NÃO TEM")
+    saveSession();
+    return router.createUrlTree(['/home']);
   }
+}
 
+const saveSession = async () => {
+  const authService = inject(AuthService);
+  await authService.doLogin();
 }
